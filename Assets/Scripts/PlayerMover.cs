@@ -1,38 +1,41 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(Collider2D))]
-[RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(GroundDetector))]
 public class PlayerMover : MonoBehaviour
 {
     private const string Horizontal = nameof(Horizontal);
 
     [SerializeField] private float _moveSpeed = 5f;
-    [SerializeField] private float _jumpForce = 10f;
-
-    [SerializeField] private LayerMask _groundLayer;
+    [SerializeField] private float _jumpForce = 7f;
 
     private Rigidbody2D _rigidbody;
+
+    private GroundDetector _groundDetector;
 
     private float _moveInput;
 
     private bool _isGrounded;
 
+    public event Action<float> MoveInputChanged;
+
+    public float MoveInput => _moveInput;
+
+    public bool IsGrounded => _groundDetector.IsGrounded;
+
+    public Rigidbody2D Rigidbody => _rigidbody;
+
     private void Start()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
+        _groundDetector = GetComponent<GroundDetector>();
+        _groundDetector.GroungingChandeg += OnGroundingChanged;
     }
 
     private void Update()
     {
-        _moveInput = Input.GetAxisRaw(Horizontal);
-
-        _isGrounded = CheckGrounding();
-
-        if (Input.GetKeyDown(KeyCode.Space) && _isGrounded)
-        {
-            Jump();
-        }
+        HandleInput();
     }
 
     private void FixedUpdate()
@@ -40,30 +43,27 @@ public class PlayerMover : MonoBehaviour
         HorizontalMove();
     }
 
-    private bool CheckGrounding()
+    private void HandleInput()
     {
-        float horizontalSize = 0.8f;
-        float verticalSize = 0.1f;
-        float castDistance = 0.2f;
-        float angle = 0f;
-        
-        float playerHalfHeight = GetComponent<SpriteRenderer>().bounds.size.y / 2;
+        float previousMoveInput = _moveInput;
+        float currentMoveInput = Input.GetAxisRaw(Horizontal);
 
-        Vector2 startPoint = transform.position + Vector3.down * playerHalfHeight;
-        Vector2 box = new Vector2(horizontalSize, verticalSize);
+        if (Mathf.Abs(currentMoveInput - previousMoveInput) > 0.01f)
+        {
+            _moveInput = currentMoveInput;
+            MoveInputChanged?.Invoke(currentMoveInput);
+        }
 
-        RaycastHit2D hit = Physics2D.BoxCast(
-            startPoint,
-            box,
-            angle,
-            Vector2.down,
-            castDistance,
-            _groundLayer
-            );
-
-        return hit.collider != null;
+        if (Input.GetKeyDown(KeyCode.Space) && _isGrounded)
+        {
+            Jump();
+        }
     }
 
+    private void OnGroundingChanged(bool isGrounded)
+    {
+        _isGrounded = isGrounded;
+    }
 
     private void HorizontalMove()
     {
@@ -74,8 +74,4 @@ public class PlayerMover : MonoBehaviour
     {
         _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, _jumpForce);
     }
-
-  
-
-
 }
