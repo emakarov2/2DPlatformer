@@ -1,52 +1,48 @@
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(EnemyMover))]
-public class EnemyPatrol : MonoBehaviour
+[RequireComponent(typeof(IMover))]
+public class PatrolBehaviour : MonoBehaviour
 {
     [SerializeField] private Transform[] _wayPoints;
 
-    private EnemyMover _mover;
+    private IMover _mover;
 
     private int _pointIndex = 0;
     private float _distanceInaccuracy = 1.5f;
     private float _delayAtBorder = 3f;
     private bool _isWaiting = false;
 
-
     private void Start()
     {
-        _mover = GetComponent<EnemyMover>();
+        _mover = GetComponent<PhysicsMover>();
     }
 
-    private void Update()
+    public void Work()
     {
         if (_isWaiting) return;
 
-        Transform _pointByIndex = _wayPoints[_pointIndex];
+        Transform pointByIndex = _wayPoints[_pointIndex];
 
-        _mover.MoveToTarget(_pointByIndex.position);
+        _mover.Move(pointByIndex.position);
 
-        if (Vector2.Distance(transform.position, _pointByIndex.position) < _distanceInaccuracy)        
+        if ((transform.position - pointByIndex.position).sqrMagnitude < _distanceInaccuracy * _distanceInaccuracy)
         {
-            StartCoroutine(WaitAtPoint());
+            StartCoroutine(WaitAtPointReached());
+            SetNextWayPoint();
         }
     }
 
-    private IEnumerator WaitAtPoint()
+    private IEnumerator WaitAtPointReached()
     {
         WaitForSeconds delay = new WaitForSeconds(_delayAtBorder);
-        
+
         _isWaiting = true;
-        
         _mover.Stop();
 
         yield return delay;
 
-        SetNextWayPoint();
-
         _mover.Continue();
-
         _isWaiting = false;
     }
 

@@ -1,4 +1,4 @@
-using System;
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
@@ -7,32 +7,26 @@ public class GroundDetector : MonoBehaviour
     [SerializeField] private LayerMask _groundLayer;
 
     private SpriteRenderer _spriteRenderer;
-    private bool _isGrounded;
 
-    public event Action<bool> GroungingChandeg;
-
-    public bool IsGrounded
-    {
-        get => _isGrounded;
-
-        private set
-        {
-            if (_isGrounded != value)
-            {
-                _isGrounded = value;
-                GroungingChandeg?.Invoke(value);
-            }
-        }
-    }
+    public bool IsGrounded { get; private set; }
 
     private void Start()
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
+
+        StartCoroutine(GroundCheckRoutine());
     }
 
-    private void FixedUpdate()
+    private IEnumerator GroundCheckRoutine()
     {
-        IsGrounded = CheckGrounding();
+        float delay = 0.1f;
+        WaitForSeconds wait = new WaitForSeconds(delay);
+
+        while (enabled)
+        {
+            IsGrounded = CheckGrounding();
+            yield return wait;
+        }
     }
 
     private bool CheckGrounding()

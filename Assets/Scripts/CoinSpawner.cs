@@ -1,63 +1,80 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class CoinsSpawner : MonoBehaviour
 {
-    [SerializeField] private Coin _coinPrefab;
-    [SerializeField] private ManualCoin _manualCoinPrefab;
+    [SerializeField] private Collector _collector;
 
-    [SerializeField] private Transform[] spawnPoints;
+    [SerializeField] private Gem _gemPrefab;
+    [SerializeField] private Berry _berryPrefab;
+    
+    [SerializeField] private List <Transform> _spawnPoints;
 
-    [SerializeField] private float spawnInterval = 5f;
-    [SerializeField] private float spawnChance = 0.7f;
-   // [SerializeField] private float checkRadius = 1f;
+    [SerializeField] private float _spawnInterval = 4f;
+    [SerializeField] private float _spawnChance = 0.7f;
 
-    [SerializeField] private float interactiveCoinChance = 0.3f;
+    [SerializeField] private float _interactiveCoinChance = 0.3f;
 
     private void Start()
     {
         StartCoroutine(SpawnCoinsRoutine());
+
+        _collector.CollectedItem += OnCollectedItem;
+    }
+
+    private void OnDisable()
+    {
+        _collector.CollectedItem -= OnCollectedItem;
     }
 
     private IEnumerator SpawnCoinsRoutine()
     {
-        while (true)
-        {
-            yield return new WaitForSeconds(spawnInterval);
+        WaitForSeconds delay = new WaitForSeconds(_spawnInterval);
 
-            if (Random.value <= spawnChance)
+        while (enabled)
+        {
+            yield return delay;
+
+            if (Random.value <= _spawnChance)
             {
                 SpawnCoin();
             }
         }
     }
 
+    private void OnCollectedItem(Coin coin)
+    {       
+            
+
+        Destroy(coin.gameObject);
+    }
+
     private void SpawnCoin()
     {
-        if (spawnPoints.Length == 0)
+        if (_spawnPoints.Count == 0)
         {
-            Debug.LogWarning("No spawn points assigned to CoinsSpawner!");
             return;
         }
 
-        int randomIndex = Random.Range(0, spawnPoints.Length);
-        Transform spawnPoint = spawnPoints[randomIndex];
-
-        var pointsList = spawnPoints.ToList();
-        pointsList.RemoveAt(randomIndex);
-        spawnPoints = pointsList.ToArray();
-
-        if (Random.value <= interactiveCoinChance)
+        int randomIndex = Random.Range(0, _spawnPoints.Count);
+        Transform spawnPoint = _spawnPoints[randomIndex];
+                
+        _spawnPoints.RemoveAt(randomIndex);
+        
+        if (Random.value <= _interactiveCoinChance)
         {
-            if (_manualCoinPrefab != null)
-                Instantiate(_manualCoinPrefab, spawnPoint.position, Quaternion.identity);
+            if (_berryPrefab != null)
+            {
+                Instantiate(_berryPrefab, spawnPoint.position, Quaternion.identity);
+            }
         }
         else
         {
-            if (_coinPrefab != null)
-                Instantiate(_coinPrefab, spawnPoint.position, Quaternion.identity);
+            if (_gemPrefab != null)
+            {
+                Instantiate(_gemPrefab, spawnPoint.position, Quaternion.identity);
+            }
         }
     }
 }
