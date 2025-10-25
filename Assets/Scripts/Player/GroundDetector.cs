@@ -10,10 +10,13 @@ public class GroundDetector : MonoBehaviour
 
     public bool IsGrounded { get; private set; }
 
-    private void Start()
+    private void Awake()
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
+    }
 
+    private void Start()
+    {
         StartCoroutine(GroundCheckRoutine());
     }
 

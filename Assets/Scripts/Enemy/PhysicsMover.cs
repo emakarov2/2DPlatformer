@@ -1,23 +1,24 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(Flipper))]
 public class PhysicsMover : MonoBehaviour, IMover
 {
     [SerializeField] private float _speed = 3f;
 
     private Rigidbody2D _rigidbody;
-    private Flipper _flipper;
 
     private float _defaultSpeed;
 
     public bool IsDirectionDefault { get; private set; }
 
+    private void Awake()
+    {
+        _rigidbody = GetComponent<Rigidbody2D>();
+    }
+
     private void Start()
     {
         _defaultSpeed = _speed;
-        _rigidbody = GetComponent<Rigidbody2D>();
-        _flipper = GetComponent<Flipper>();
     }
 
     public void Move(Vector2 target)

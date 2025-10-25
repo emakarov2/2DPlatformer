@@ -44,9 +44,7 @@ public class CoinsSpawner : MonoBehaviour
     }
 
     private void OnCollectedItem(Coin coin)
-    {       
-            
-
+    {     
         Destroy(coin.gameObject);
     }
 
