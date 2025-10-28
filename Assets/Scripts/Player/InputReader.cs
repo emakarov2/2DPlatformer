@@ -6,6 +6,7 @@ public class InputReader : MonoBehaviour
 
     private bool _isJump;
     private bool _isInteracting;
+    private bool _isAttacking;
     private bool _isDirectionDefault = true;
 
     public bool IsDirectionDefault => _isDirectionDefault;
@@ -29,7 +30,14 @@ public class InputReader : MonoBehaviour
         {
             _isInteracting = true;
         }
+
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            _isAttacking = true;
+        }
     }
+
+    public bool GetIsAttacking() => GetBoolAsTrigger(ref _isAttacking);
 
     public bool GetIsInteracting() => GetBoolAsTrigger(ref _isInteracting);
 

@@ -5,8 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(InputReader))]
 [RequireComponent(typeof(GroundDetector))]
 [RequireComponent(typeof(Collector))]
-[RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Health))]
+[RequireComponent(typeof(Attack))]
+
 public class Player : MonoBehaviour
 {
     private Flipper _flipper;
@@ -14,7 +15,8 @@ public class Player : MonoBehaviour
     private PlayerMover _mover;
     private GroundDetector _groundDetector;
     private Collector _collector;
-
+    private Health _health;
+    private Attack _attack;
 
     private void Awake()
     {
@@ -23,6 +25,8 @@ public class Player : MonoBehaviour
         _mover = GetComponent<PlayerMover>();
         _groundDetector = GetComponent<GroundDetector>();
         _collector = GetComponent<Collector>();
+        _health = GetComponent<Health>();
+        _attack = GetComponent<Attack>();
     }
 
     private void Update()
@@ -46,5 +50,15 @@ public class Player : MonoBehaviour
         {
             _collector.CollectBerry();
         }
+
+        if (_inputReader.GetIsAttacking()) 
+        {
+            _attack.Strike();
+        }
+    }
+
+    public void AcceptAttack(float damage)
+    {
+        _health.Decrease(damage);      
     }
 }

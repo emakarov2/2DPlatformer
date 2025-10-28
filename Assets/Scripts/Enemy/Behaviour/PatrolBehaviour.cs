@@ -9,7 +9,7 @@ public class PatrolBehaviour : MonoBehaviour
     private IMover _mover;
 
     private int _pointIndex = 0;
-    private float _distanceInaccuracy = 1.5f;
+    private float _distanceInaccuracy = 1f;
     private float _delayAtBorder = 3f;
     private bool _isWaiting = false;
 
@@ -26,7 +26,7 @@ public class PatrolBehaviour : MonoBehaviour
 
         _mover.Move(pointByIndex.position);
 
-        if ((transform.position - pointByIndex.position).sqrMagnitude < _distanceInaccuracy * _distanceInaccuracy)
+        if ((Mathf.Abs(transform.position.x - pointByIndex.position.x) < _distanceInaccuracy))
         {
             StartCoroutine(WaitAtPointReached());
             SetNextWayPoint();
