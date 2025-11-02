@@ -1,20 +1,34 @@
 using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(Attack))]
 public class Attacking : MonoBehaviour
 {
-    [SerializeField] private Player _player;
-
-    [SerializeField] private float _damage = 5f;
     [SerializeField] private float _delay = 1f;
 
+    private Attack _attack;
+
     private Coroutine _coroutine;
+
+    public bool IsAttacking { get; private set; }
+
+    private void Awake()
+    {
+        _attack = GetComponent<Attack>();
+    }
+
+    private void Start()
+    {
+        IsAttacking = false;
+    }
 
     public void StartAttack()
     {
         if (_coroutine == null)
         {
             _coroutine = StartCoroutine(StrikePerDelayRoutine());
+
+            IsAttacking = true;
         }
     }
 
@@ -22,8 +36,10 @@ public class Attacking : MonoBehaviour
     {
         if (_coroutine != null)
         {
-            StopCoroutine( _coroutine );
+            StopCoroutine(_coroutine);
             _coroutine = null;
+
+            IsAttacking = false;
         }
     }
 
@@ -34,12 +50,7 @@ public class Attacking : MonoBehaviour
         while (enabled)
         {
             yield return wait;
-            Strike();
+            _attack.Strike();
         }
-    }
-
-    private void Strike()
-    {
-        _player.AcceptAttack(_damage);
     }
 }

@@ -1,6 +1,4 @@
-using UnityEngine;
-
-public class Gem : Coin 
+public class Gem : Item 
 { 
 
 }  

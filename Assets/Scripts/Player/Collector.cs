@@ -4,18 +4,19 @@ using UnityEngine;
 
 public class Collector : MonoBehaviour
 {
-    public event Action<Coin> CollectedItem;
-
     private List<Berry> _berriesNear = new List<Berry>();
+
+    public event Action<Item> CollectedItem;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.TryGetComponent(out Gem gem))
         {
             CollectedItem?.Invoke(gem);
+            gem.InvokeCollected();
         }
 
-        if (collision.gameObject.TryGetComponent<Berry>(out Berry berry))
+        if (collision.gameObject.TryGetComponent(out Berry berry))
         {
             if (_berriesNear.Contains(berry) == false)
             {
@@ -26,7 +27,7 @@ public class Collector : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.gameObject.TryGetComponent<Berry>(out Berry berry))
+        if (collision.gameObject.TryGetComponent(out Berry berry))
         {
             _berriesNear.Remove(berry);
         }
@@ -37,6 +38,7 @@ public class Collector : MonoBehaviour
         if (_berriesNear.Count > 0)
         {
             Berry berry = _berriesNear[0];
+            berry.InvokeCollected();
             CollectedItem?.Invoke(berry);
         }
     }

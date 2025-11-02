@@ -3,6 +3,8 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public class Attack : MonoBehaviour
 {
+    [SerializeField] private LayerMask _targetLayer;
+
     private SpriteRenderer _spriteRenderer;
 
     private float _range = 1;
@@ -15,15 +17,17 @@ public class Attack : MonoBehaviour
 
     public void Strike()
     {
-        Enemy enemy = TryGetTarget();
+        Entity target = TryGetTarget();
+        Debug.Log("поиск цели");
 
-        if (enemy != null)
+        if (target != null)
         {
-            enemy.AcceptAttack(_damage);
+        Debug.Log("цель найдена");
+            target.AcceptAttack(_damage);
         }
     }
 
-    private Enemy TryGetTarget()
+    private Entity TryGetTarget()
     {
         float playerHalfWidht = _spriteRenderer.bounds.size.y / 2;
 
@@ -32,10 +36,11 @@ public class Attack : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(
         rayStart,
         transform.right,
-        _range
+        _range,
+        _targetLayer
               );
 
-        if (hit.collider != null && hit.collider.TryGetComponent(out Enemy component))
+        if (hit.collider != null && hit.collider.TryGetComponent(out Entity component))
         {
             return component;
         }

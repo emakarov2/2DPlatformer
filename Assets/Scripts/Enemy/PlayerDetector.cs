@@ -3,12 +3,10 @@ using UnityEngine;
 
 public class PlayerDetector : MonoBehaviour
 {
-    [SerializeField] private float _sightDistance = 100f;
+    [SerializeField] private float _sightDistance = 25f;
     [SerializeField] private float _sightAngle = 120f;
     [SerializeField] private LayerMask _obstacleLayer;
-    [SerializeField] Transform _player;
-
-    private Vector2 _directionToPlayer;
+    [SerializeField] private LayerMask _playerLayer;
 
     private float _attackDistance = 2f;
 
@@ -17,39 +15,12 @@ public class PlayerDetector : MonoBehaviour
 
     private void Start()
     {
-        _directionToPlayer = _player.position - transform.position;
-        StartCoroutine(PlayerCheckRoutine());
+        IsDetected = false;
+        CanAttack = false;
+        StartCoroutine(FindTargetRoutine());
     }
 
-    private bool CanSeePlayer()
-    {
-        if (_player == null) return false;
-
-        _directionToPlayer = _player.position - transform.position;
-        float distanceToPlayer = _directionToPlayer.magnitude;
-        float sightAngleHalf = _sightAngle / 2;
-
-        if (_directionToPlayer.sqrMagnitude > _sightDistance * _sightDistance) return false;
-
-        float angleToPlayer = Vector2.Angle(transform.right, _directionToPlayer);
-        if (angleToPlayer > sightAngleHalf) return false;
-
-        RaycastHit2D hit = Physics2D.Raycast(
-         transform.position,
-         _directionToPlayer.normalized,
-         distanceToPlayer,
-         _obstacleLayer
-                       );
-
-        return hit.collider == null;
-    }
-
-    private bool IsPlayerInAttackSector()
-    {
-        return (IsDetected && _directionToPlayer.sqrMagnitude <= _attackDistance * _attackDistance);
-    }
-
-    private IEnumerator PlayerCheckRoutine() 
+    private IEnumerator FindTargetRoutine()
     {
         float delay = 0.1f;
         WaitForSeconds waitForSeconds = new WaitForSeconds(delay);
@@ -57,8 +28,53 @@ public class PlayerDetector : MonoBehaviour
         while (enabled)
         {
             yield return waitForSeconds;
-            IsDetected = CanSeePlayer();
-            CanAttack = IsPlayerInAttackSector();
+
+            IsDetected = CanSeePlayer(out float distance);
+            CanAttack = (IsDetected && distance < _attackDistance);
         }
+    }
+
+    private Transform TryGetTarget()
+    {
+        Collider2D hit = Physics2D.OverlapCircle(
+            transform.position,
+            _sightDistance,
+            _playerLayer
+            );
+
+        if (hit == null)
+        { return null; }
+        else
+        { return hit.transform; }
+    }
+
+    private bool IsInSector(Transform target, out Vector2 direction)
+    {
+        direction = target.position - transform.position;
+
+        float sightAngleHalf = _sightAngle / 2;
+        float angleToPlayer = Vector2.Angle(transform.right, direction);
+
+        return angleToPlayer < sightAngleHalf;
+    }
+
+    private bool CanSeePlayer(out float distance)
+    {
+        distance = 0f;
+        Transform target = TryGetTarget();
+
+        if (target == null)
+        { return false; }
+        
+        if (IsInSector(target, out Vector2 direction) == false)
+        { return false; }
+
+        distance = direction.magnitude;
+        
+        return Physics2D.Raycast(
+            transform.position,
+            direction,
+            distance,
+            _obstacleLayer).collider == null;
     }
 }

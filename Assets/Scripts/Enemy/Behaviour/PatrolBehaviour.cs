@@ -26,7 +26,7 @@ public class PatrolBehaviour : MonoBehaviour
 
         _mover.Move(pointByIndex.position);
 
-        if ((Mathf.Abs(transform.position.x - pointByIndex.position.x) < _distanceInaccuracy))
+        if (Mathf.Abs(transform.position.x - pointByIndex.position.x) < _distanceInaccuracy)
         {
             StartCoroutine(WaitAtPointReached());
             SetNextWayPoint();

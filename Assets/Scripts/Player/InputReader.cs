@@ -10,6 +10,7 @@ public class InputReader : MonoBehaviour
     private bool _isDirectionDefault = true;
 
     public bool IsDirectionDefault => _isDirectionDefault;
+    public bool IsAttacking => _isAttacking;
     public float Direction { get; private set; }
 
     private void Update()

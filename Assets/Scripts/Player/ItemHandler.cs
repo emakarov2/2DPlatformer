@@ -23,7 +23,7 @@ public class ItemHandler : MonoBehaviour
         _collector.CollectedItem -= OnCollectedItem;
     }
 
-    private void OnCollectedItem(Coin coin)
+    private void OnCollectedItem(Item coin)
     {
         if (coin != null && coin.gameObject.TryGetComponent(out Berry berry))
         {
